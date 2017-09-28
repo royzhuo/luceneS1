@@ -305,8 +305,4 @@ public class WuLiuService {
         return null;
     }
 
-    public String  doGet1(String url,Map<String,Object> params){
-
-        return null;
-    }
 }

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+         http://www.springframework.org/schema/context
+         http://www.springframework.org/schema/context/spring-context.xsd
+          http://www.springframework.org/schema/tx
+           http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <!--读取db属性文件-->
+    <context:property-placeholder location="classpath:db.properties"/>
+
+   <!--过滤掉spring mvc注解-->
+    <context:component-scan base-package="httpClient,lucene">
+        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+        <context:exclude-filter type="annotation" expression="org.springframework.web.bind.annotation.ControllerAdvice"/>
+        <context:exclude-filter type="annotation" expression="org.springframework.web.bind.annotation.RestController"/>
+        <context:exclude-filter type="annotation" expression="org.springframework.web.bind.annotation.RestControllerAdvice"/>
+    </context:component-scan>
+
+    <!--C3P0连接池-->
+    <bean class="com.mchange.v2.c3p0.ComboPooledDataSource" id="dataSource">
+        <property name="user" value="${mysql.user}"/>
+        <property name="password" value="${mysql.pwd}"/>
+        <property name="jdbcUrl" value="${mysql.url}"/>
+        <property name="driverClass" value="${mysql.driver}"/>
+        <property name="initialPoolSize" value="${mysql.initSize}"/>
+        <property name="maxPoolSize" value="${mysql.maxActive}"/>
+        <property name="minPoolSize" value="${mysql.minactiv}"/>
+        <property name="checkoutTimeout" value="${mysql.macWait}"/>
+    </bean>
+    <!--jpa-->
+    <!--<bean class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean" id="entityManager">-->
+        <!--<property name="dataSource" ref="dataSource"/>-->
+        <!--<property name="jpaVendorAdapter">-->
+            <!--<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter"/>-->
+        <!--</property>-->
+        <!--&lt;!&ndash;<property name="packagesToScan" value=""/>/&ndash;&gt;-->
+        <!--<property name="jpaProperties">-->
+            <!--<props>-->
+                <!--<prop key="hibernate.show_sql">true</prop>-->
+                <!--<prop key="hibernate.format_sql">true</prop>-->
+                <!--<prop key="hibernate.hbm2ddl.auto">update</prop>-->
+                <!--<prop key="hibernate.dialect">org.hibernate.dialect.MySQL5Dialect</prop>-->
+            <!--</props>-->
+        <!--</property>-->
+    <!--</bean>-->
+
+    <!--事务管理器-->
+    <!--<bean class="org.springframework.orm.jpa.JpaTransactionManager" id="transactionManager">-->
+        <!--<property name="entityManagerFactory" ref="entityManager"/>-->
+    <!--</bean>-->
+
+    <!--<tx:annotation-driven transaction-manager="transactionManager"/>-->
+
+     <import resource="classpath:ThirdInfo.xml"  />
+
+
+</beans>
