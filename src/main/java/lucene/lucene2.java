@@ -31,7 +31,8 @@ public class lucene2 {
 //        testLucene3();
 //        testLuceneHighLight();//
 //        lucenePageTest();
-        testLuceneSort();
+//        testLuceneSort();
+        testLuceneSort2();
     }
 
 
@@ -110,10 +111,9 @@ public class lucene2 {
         document2.add(new IntPoint("score", 60));
         indexWriter.addDocument(document);
         indexWriter.addDocument(document2);
-        indexWriter.close();
+//        indexWriter.close();
         //3.搜索
-        IndexReader indexReader = DirectoryReader.open(directory);
-        IndexSearcher indexSearcher = new IndexSearcher(indexReader);
+        IndexReader indexReader = DirectoryReader.open(directory);IndexSearcher indexSearcher = new IndexSearcher(indexReader);
 
         String queryContent = "life";
         //booleanquery为组合查询，可以拼接多个条件
@@ -290,14 +290,15 @@ public class lucene2 {
         //创建需要用于查询的字段数组
         String[] fields={"title"};
         //创建用于查询的类分析器
-        QueryParser queryParser=new MultiFieldQueryParser(fields,analyzer);
+//        QueryParser queryParser=new MultiFieldQueryParser(fields,analyzer);
+        QueryParser queryParser=new QueryParser("title",analyzer);
         //查询符合关键字的数据
         Query query=queryParser.parse(queryContent);
 
         //创建排序字段用于升序
 //        SortField sortField=new SortField("id", SortField.Type.INT);
         //创建排序字段用于降序
-        SortField sortField=new SortField("id",SortField.Type.INT);
+        SortField sortField=new SortField("id",SortField.Type.INT,false);
 
         //创建sort排序字段
         Sort sort=new Sort(sortField);
@@ -314,6 +315,59 @@ public class lucene2 {
             Document document=indexSearcher.doc(scoreDoc.doc);
             String resultId= document.get("id");
             System.out.println("id:"+resultId);
+        }
+    }
+
+    public static void testLuceneSort2() throws IOException, ParseException {
+        Analyzer analyzer=LuceneUtils.getAnalyzer();
+        Directory directory=LuceneUtils.getDirectory();
+        IndexWriter indexWriter=LuceneUtils.getIndexWriter(directory,analyzer);
+        List<News> newsList=new ArrayList<>();
+        News news1=new News(10001,"thinking in java",new Date(),new Date(),"鲁滨孙java和他的队友在美国太平洋荒岛生活一星期");
+        News news2=new News(10002,"thinking in c++",new Date(),new Date(),"鲁滨孙和他的java队友在中国南海荒岛生活二星期");
+        News news3=new News(10003,"thinking in lubinshu",new Date(),new Date(),"鲁滨孙和他的java队友在北极北冰洋海荒岛生活三星期");
+        newsList.add(news1);
+        newsList.add(news2);
+        newsList.add(news3);
+        for (News news:newsList){
+            Document document=new Document();
+            IntPoint intPoint=new IntPoint("nId",news.getId());
+            FieldType fieldType=new FieldType();
+            fieldType.setStored(true);
+            StoredField storedField=new StoredField("nId",news.getId());
+            NumericDocValuesField numericDocValuesField=new NumericDocValuesField("nId",news.getId());
+            StringField stringField=new StringField("title",news.getTitle(), Field.Store.YES);
+            TextField textField=new TextField("content",news.getContent(), Field.Store.YES);
+            document.add(intPoint);
+            document.add(numericDocValuesField);
+            document.add(storedField);
+            document.add(stringField);
+            document.add(textField);
+            indexWriter.addDocument(document);
+        }
+
+indexWriter.close();
+
+        IndexReader indexReader=DirectoryReader.open(directory);
+        IndexSearcher indexSearcher=new IndexSearcher(indexReader);
+
+        String queryContent="二星";
+        QueryParser queryParser=new QueryParser("content",analyzer);
+
+        //降序
+        SortField sortField=new SortField("nId", SortField.Type.INT);
+        Sort sort=new Sort(sortField);
+
+        Query query=queryParser.parse(queryContent);
+        TopDocs topFieldDocs=indexSearcher.search(query,100,sort);
+        int count=topFieldDocs.totalHits;
+        System.out.println("命中数:"+count);
+        ScoreDoc[] scoreDocs=topFieldDocs.scoreDocs;
+        for (ScoreDoc scoreDoc:scoreDocs){
+            int doc=scoreDoc.doc;
+            Document resultDocument=indexSearcher.doc(doc);
+            System.out.println("id:"+doc+" title:"+resultDocument.get("title")+" content:"+resultDocument.get("content"));
+
         }
 
 

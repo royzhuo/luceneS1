@@ -1,6 +1,7 @@
 package lucene;
 
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.cjk.CJKAnalyzer;
 import org.apache.lucene.analysis.cn.smart.SmartChineseAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.*;
@@ -14,9 +15,20 @@ import java.util.List;
 
 public class LuceneUtils {
 
+    private static Analyzer analyzer;
+
+    private static IndexWriter indexWriter;
+
+
     //分词器
     public static Analyzer getAnalyzer(){
-        Analyzer analyzer=new SmartChineseAnalyzer();
+        if (analyzer==null){
+            synchronized (Analyzer.class){
+                if (analyzer==null){
+                    analyzer=new CJKAnalyzer();
+                }
+            }
+        }
         return analyzer;
     }
 
@@ -30,8 +42,14 @@ public class LuceneUtils {
     public static IndexWriter getIndexWriter(Directory directory,Analyzer analyzer) throws IOException {
         //目录
        // Directory directory=new RAMDirectory();
-        IndexWriterConfig indexWriterConfig=new IndexWriterConfig(analyzer);
-        IndexWriter indexWriter=new IndexWriter(directory,indexWriterConfig);
+        if (indexWriter==null){
+            synchronized (IndexWriter.class){
+                if (indexWriter==null){
+                    IndexWriterConfig indexWriterConfig=new IndexWriterConfig(analyzer);
+                    indexWriter=new IndexWriter(directory,indexWriterConfig);
+                }
+            }
+        }
         return indexWriter;
     }
 

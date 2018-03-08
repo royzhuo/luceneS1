@@ -49,7 +49,7 @@ public class IndexWriterOfLucene {
                 Document document=searcher.doc(docId);
                 System.out.println((i+1)+" .  "+document.get("isbn")+"\t"+document.get("title"));
             }
-indexReader.close();
+            indexReader.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
